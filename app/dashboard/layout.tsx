@@ -1,7 +1,16 @@
 import SideNav from '@/app/ui/dashboard/sidenav'
 import React from 'react';
+import { Metadata } from 'next';
 
 export const experimental_ppr = true;
+export const metadata: Metadata = {
+    title: {
+        template: '%s | CuongDC Dashboard',
+        default: 'CuongDC Dashboard',
+      },
+    description: 'The official Next.js Course Dashboard, built with App Router.',
+    metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
+  };
 
 export default function Layout({ children} : { children: React.ReactNode}) {
     return (
