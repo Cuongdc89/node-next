@@ -101,6 +101,7 @@ export async function fetchFilteredInvoices(
         customers.name,
         customers.email,
         customers.phone,
+        customers.address,
         customers.image_url
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id

@@ -51,6 +51,7 @@ export type InvoicesTable = {
   email: string;
   phone: string;
   note: string;
+  address: string;
   image_url: string;
   date: string;
   amount: number;

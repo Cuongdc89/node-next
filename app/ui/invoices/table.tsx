@@ -67,6 +67,9 @@ export default async function InvoicesTable({
                   Note
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
+                  Address
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
                   Amount
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
@@ -103,6 +106,9 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {invoice.note}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {invoice.address}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatCurrency(invoice.amount)}
