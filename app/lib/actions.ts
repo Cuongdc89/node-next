@@ -19,14 +19,28 @@ const FormSchema = z.object({
     date: z.string()
 })
 
+const FormCustomerSchema = z.object({
+    name: z.string().min(6, { message: 'Name must be at least 6 characters long.' }),
+    email: z.string().email({ message: 'Please enter a valid email address.' }),
+    date: z.string()
+  })
+
 const CreateInvoice = FormSchema.omit({id:true, date:true});
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
-
+const CreateCustommer = FormCustomerSchema.omit({date:true});
 export type State = {
     errors?: {
       customerId?: string[];
       amount?: string[];
       status?: string[];
+    };
+    message?: string | null;
+  };
+
+  export type CreateCustomerState = {
+    errors?: {
+      name?: string[];
+      email?: string[];
     };
     message?: string | null;
   };
@@ -126,3 +140,33 @@ export async function authenticate(
       throw error;
     }
   }
+
+  export async function createCustommer(prevState: CreateCustomerState, formData: FormData) {
+    const validatedFields = CreateCustommer.safeParse({
+      name: formData.get('name'),
+      email: formData.get('email'),
+    });
+
+    console.log(validatedFields);
+
+    if (!validatedFields.success) {
+        return {
+          errors: validatedFields.error.flatten().fieldErrors,
+          message: 'Missing Fields. Failed to Create Invoice.',
+        };
+    }
+
+    const { name, email } = validatedFields.data;
+    try {
+        await sql `
+        INSERT into customers (name, email, image_url)
+        VALUES (${name}, ${email}, 'https://randomuser.me/api/portraits')`;
+    } catch(error) {
+        console.log(error)
+        return {
+            message: 'Database Error: Failed to Create Invoice.',
+        }
+    }
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+}

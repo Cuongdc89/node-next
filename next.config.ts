@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   experimental: {
     ppr: 'incremental',
   },
+  images: {
+    domains: ["randomuser.me"],
+  },
 };
 
 export default nextConfig;
