@@ -38,6 +38,7 @@ async function seedInvoices() {
       customer_id UUID NOT NULL,
       amount INT NOT NULL,
       status VARCHAR(255) NOT NULL,
+      node TEXT VARCHAR(500) NULL,
       date DATE NOT NULL
     );
   `;
@@ -62,8 +63,10 @@ async function seedCustomers() {
     CREATE TABLE IF NOT EXISTS customers (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) NOT NULL,
-      image_url VARCHAR(255) NOT NULL
+      phone VARCHAR(32) NULL,
+      email VARCHAR(255) NULL,
+      address VARCHAR(500) NOT NULL,
+      image_url VARCHAR(255) NULL
     );
   `;
 

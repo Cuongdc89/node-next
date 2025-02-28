@@ -16,12 +16,15 @@ const FormSchema = z.object({
     status:z.enum(['pending', 'paid'], {
         invalid_type_error: 'Please select an invoice status.',
     }),
-    date: z.string()
+    date: z.string(),
+    note: z.string().max(500, { message: 'Note must be less than 500 characters long.' }),
 })
 
 const FormCustomerSchema = z.object({
     name: z.string().min(6, { message: 'Name must be at least 6 characters long.' }),
     email: z.string().email({ message: 'Please enter a valid email address.' }),
+    phone: z.string().min(10, { message: 'Phone number must be at least 10 characters long.' }),
+    address: z.string(),
     date: z.string()
   })
 
@@ -33,23 +36,27 @@ export type State = {
       customerId?: string[];
       amount?: string[];
       status?: string[];
+      note?: string[];
     };
     message?: string | null;
   };
 
-  export type CreateCustomerState = {
-    errors?: {
-      name?: string[];
-      email?: string[];
-    };
-    message?: string | null;
+export type CreateCustomerState = {
+  errors?: {
+    name?: string[];
+    email?: string[];
+    phone?: string[];
+    address?: string[];
   };
+  message?: string | null;
+};
 
 export async function createInvoice(prevState: State, formData: FormData) {
     const validatedFields = CreateInvoice.safeParse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status'),
+        note: formData.get('note'),
     });
 
     if (!validatedFields.success) {
@@ -59,13 +66,13 @@ export async function createInvoice(prevState: State, formData: FormData) {
         };
     }
 
-    const { customerId, amount, status } = validatedFields.data;
+    const { customerId, amount, status, note } = validatedFields.data;
     const amountInCents = amount * 100;
     const date = new Date().toISOString().split('T')[0];
     try {
         await sql `
-        INSERT into invoices (customer_id, amount, status, date)
-        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})`;
+        INSERT into invoices (customer_id, amount, status, date, note)
+        VALUES (${customerId}, ${amountInCents}, ${status}, ${date}, ${note})`;
     } catch(error) {
         console.log(error)
         return {
@@ -81,6 +88,7 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status'),
+        note: formData.get('note'),
       });
      
       if (!validatedFields.success) {
@@ -90,12 +98,12 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
         };
       }
     
-      const { customerId, amount, status } = validatedFields.data;
+      const { customerId, amount, status, note } = validatedFields.data;
       const amountInCents = amount * 100;
     try {
         await sql`
         UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}, note = ${note}
         WHERE id = ${id}
     `;
     } catch(error) {
@@ -141,32 +149,34 @@ export async function authenticate(
     }
   }
 
-  export async function createCustommer(prevState: CreateCustomerState, formData: FormData) {
-    const validatedFields = CreateCustommer.safeParse({
-      name: formData.get('name'),
-      email: formData.get('email'),
-    });
+export async function createCustommer(prevState: CreateCustomerState, formData: FormData) {
+  const validatedFields = CreateCustommer.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
+    address: formData.get('address'),
+  });
 
-    console.log(validatedFields);
+  console.log(validatedFields);
 
-    if (!validatedFields.success) {
-        return {
-          errors: validatedFields.error.flatten().fieldErrors,
-          message: 'Missing Fields. Failed to Create Invoice.',
-        };
-    }
+  if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Create Invoice.',
+      };
+  }
 
-    const { name, email } = validatedFields.data;
-    try {
-        await sql `
-        INSERT into customers (name, email, image_url)
-        VALUES (${name}, ${email}, 'https://randomuser.me/api/portraits')`;
-    } catch(error) {
-        console.log(error)
-        return {
-            message: 'Database Error: Failed to Create Invoice.',
-        }
-    }
-    revalidatePath('/dashboard/customers');
-    redirect('/dashboard/customers');
+  const { name, email, phone, address} = validatedFields.data;
+  try {
+      await sql `
+      INSERT into customers (name, email, image_url, phone, address)
+      VALUES (${name}, ${email}, 'https://randomuser.me/api/portraits', ${phone}, ${address})`;
+  } catch(error) {
+      console.log(error)
+      return {
+          message: 'Database Error: Failed to Create Invoice.',
+      }
+  }
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
 }

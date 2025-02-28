@@ -97,8 +97,10 @@ export async function fetchFilteredInvoices(
         invoices.amount,
         invoices.date,
         invoices.status,
+        invoices.note,
         customers.name,
         customers.email,
+        customers.phone,
         customers.image_url
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
@@ -147,7 +149,8 @@ export async function fetchInvoiceById(id: string) {
         invoices.id,
         invoices.customer_id,
         invoices.amount,
-        invoices.status
+        invoices.status,
+        invoices.note
       FROM invoices
       WHERE invoices.id = ${id};
     `;
@@ -191,6 +194,8 @@ export async function fetchFilteredCustomers(query: string, currentPage: number)
 		  customers.id,
 		  customers.name,
 		  customers.email,
+      customers.phone,
+      customers.address,
 		  customers.image_url,
 		  COUNT(invoices.id) AS total_invoices,
 		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
