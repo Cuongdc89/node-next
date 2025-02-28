@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["randomuser.me"],
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/dashboard/overview",
+        permanent: true,
+      },
+    ];
+  }
 };
 
 export default nextConfig;
